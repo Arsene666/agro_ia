@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1068036128780",
+    "firebase_url": "https://agro-ia-iot-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "agro-ia-iot",
+    "storage_bucket": "agro-ia-iot.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1068036128780:android:deba5daa5c1c52c0292e29",
+        "android_client_info": {
+          "package_name": "fr.agroIA.agro_ia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuNKyWhOA5eV8SN5ipDAOGlke6jwp6SjE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
