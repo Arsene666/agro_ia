@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../theme/app_theme.dart';
+import '../../services/firebase_service.dart';
+import 'package:firebase_database/firebase_database.dart';
+import '../../models/sensor_data.dart';
+
 
 class SensorsScreen extends StatelessWidget {
   const SensorsScreen({super.key});
@@ -112,7 +116,7 @@ class SensorsScreen extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-           BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+           BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Column(
@@ -156,7 +160,7 @@ class SensorsScreen extends StatelessWidget {
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                     ),
                   ),
                 ],
@@ -191,14 +195,14 @@ class SensorsScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: isActive ? Border.all(color: Colors.transparent) : Border.all(color: Colors.red.withOpacity(0.2)),
+        border: isActive ? Border.all(color: Colors.transparent) : Border.all(color: Colors.red.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(isActive ? Icons.warehouse_rounded : Icons.warning_rounded, color: statusColor, size: 20),
