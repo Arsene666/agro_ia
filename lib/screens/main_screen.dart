@@ -3,6 +3,7 @@ import 'package:agro_ia/theme/app_theme.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'sensors/sensors_screen.dart';
 import 'alerts/alerts_screen.dart';
+import 'manual_entry_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -28,6 +29,18 @@ class _MainScreenState extends State<MainScreen> {
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ManualEntryScreen(),
+            ),
+          );
+        },
+        backgroundColor: AppTheme.primaryGreen,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

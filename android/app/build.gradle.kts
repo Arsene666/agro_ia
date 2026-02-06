@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "fr.agroIA.agro_ia"
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
