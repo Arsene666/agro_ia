@@ -15,12 +15,14 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^6.3.2
   fl_chart: 0.66.2  # Version compatible avec Flutter SDK
+
+  shared_preferences: ^2.3.0
   
   # State management
   provider: ^6.1.2
   
   # HTTP & Networking
-  http: ^1.1.0
+  http: ^1.2.0
   
   # File system
   path_provider: ^2.1.3
@@ -33,6 +35,8 @@ dependencies:
   # SUPPRIMEZ ou commentez ces lignes :
   # vector_math: ^2.2.0
   # meta: ^1.18.0
+
+
 
 dev_dependencies:
   flutter_test:

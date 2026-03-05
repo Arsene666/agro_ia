@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../../models/weather_data.dart';
+import '../../services/sensor_history_service.dart';
+import '../../services/weather_service.dart';
+
 import '../../theme/app_theme.dart';
 import '../../services/firebase_service.dart';
 import '../../models/sensor_data.dart';
+import 'manual_entry_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -12,8 +17,27 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
+final SensorHistoryService _sensorHistoryService = SensorHistoryService();
+
 class _DashboardScreenState extends State<DashboardScreen> {
   final FirebaseService _firebaseService = FirebaseService();
+  final WeatherService _weatherService = WeatherService();
+  WeatherData? _weatherData;
+  bool _weatherLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWeather();
+  }
+
+  Future<void> _loadWeather() async {
+    final data = await _weatherService.fetchWeather();
+    setState(() {
+      _weatherData = data;
+      _weatherLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +60,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         final sensor = snapshot.data!;
 
+        _sensorHistoryService.maybeSaveSensorData(
+          temperature: sensor.temperature,
+          humidity: sensor.humidity,
+        );
+
         return Scaffold(
           backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+          // FIX: Move floatingActionButton here, outside the body
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ManualEntryScreen(),
+                ),
+              );
+            },
+            backgroundColor: AppTheme.primaryGreen,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
           body: SingleChildScrollView(
             child: Column(
               children: [
@@ -61,16 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Colors.redAccent,
                       ),
 
-                      const SizedBox(height: 12),
-
-                      _buildStockItem(
-                        context,
-                        "Bananes",
-                        "150 kg",
-                        "Récolté il y a 4j",
-                        Colors.amber.withValues(alpha: 0.1),
-                        Colors.amber,
-                      ),
+                      // The button was removed from here to fix the syntax error
 
                       const SizedBox(height: 24),
                       _buildSectionHeader(context, "Alertes", ""),
@@ -78,10 +111,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _buildAlertCard(context),
 
                       const SizedBox(height: 24),
-                      _buildSectionHeader(context, "Emplacement", ""),
+                      _buildSectionHeader(context, "Prévision météorologique", ""),
                       const SizedBox(height: 16),
-                      _buildLocationPlaceholder(context),
-
+                      _buildWeatherCard(context),
                       const SizedBox(height: 30),
                     ],
                   ),
@@ -331,18 +363,114 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
-  Widget _buildLocationPlaceholder(BuildContext context) {
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        image: const DecorationImage(
-          image: NetworkImage(
-              "https://images.unsplash.com/photo-1553413077-190dd305871c?q=80&w=1000"),
-          fit: BoxFit.cover,
+  String _weatherIcon(int code) {
+    if (code == 0) return '☀️';
+    if (code <= 3) return '🌤️';
+    if (code <= 48) return '🌫️';
+    if (code <= 67) return '🌧️';
+    if (code <= 77) return '❄️';
+    if (code <= 82) return '🌦️';
+    return '⛈️';
+  }
+  String _weatherLabel(int code) {
+    if (code == 0) return 'Ensoleillé';
+    if (code <= 3) return 'Partiellement nuageux';
+    if (code <= 48) return 'Brumeux';
+    if (code <= 67) return 'Pluvieux';
+    if (code <= 77) return 'Neigeux';
+    if (code <= 82) return 'Averses';
+    return 'Orageux';
+  }
+  Widget _buildWeatherCard(BuildContext context) {
+    if (_weatherLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_weatherData == null) {
+      return Container(
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
         ),
+        child: const Center(child: Text("Météo indisponible")),
+      );
+    }
+    final w = _weatherData!;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${w.temperature.toStringAsFixed(1)}°C',
+                    style: const TextStyle(
+                      color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    _weatherLabel(w.weatherCode),
+                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.air, color: Colors.white70, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${w.windspeed.toStringAsFixed(0)} km/h',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Text(_weatherIcon(w.weatherCode),
+                  style: const TextStyle(fontSize: 60)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.white24),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: w.hourly.map((h) {
+              return Column(
+                children: [
+                  Text(_weatherIcon(h.code),
+                      style: const TextStyle(fontSize: 18)),
+                  const SizedBox(height: 4),
+                  Text('${h.temp.toStringAsFixed(0)}°',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13)),
+                  Text(h.hour,
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 11)),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
+
+
+
+
 }
