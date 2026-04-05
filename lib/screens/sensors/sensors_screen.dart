@@ -7,9 +7,9 @@ import 'package:agro_ia/services/stock_service.dart';
 import 'package:agro_ia/models/stock_item.dart';
 import 'package:agro_ia/theme/app_theme.dart';
 
-// ─────────────────────────────────────────────
+// ==================================================
 //  MODEL : Un point de donnée historique
-// ─────────────────────────────────────────────
+// ==================================================
 class SensorPoint {
   final DateTime time;
   final double temperature;
@@ -21,7 +21,7 @@ class SensorPoint {
   });
 }
 
-// Support classes for Recommendations
+// Support de classe pour les Recommendations
 enum _Urgency { high, medium, ok }
 
 class _Recommendation {
@@ -407,9 +407,9 @@ class _RecommendationCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
+// =================================================
 //  PAINTER : Dessin de la courbe
-// ─────────────────────────────────────────────
+// =================================================
 class _SensorChart extends StatelessWidget {
   final List<SensorPoint> points;
   final double Function(SensorPoint) getValue;

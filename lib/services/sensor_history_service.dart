@@ -6,7 +6,7 @@ class SensorHistoryService {
   static const String _lastSaveKey = 'last_sensor_save';
   static const int _intervalDays = 3;
 
-  // Appeler cette méthode à chaque lecture de capteur
+  // Appel de la méthode à chaque lecture de capteur
   Future<void> maybeSaveSensorData({
     required double temperature,
     required double humidity,

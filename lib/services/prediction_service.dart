@@ -52,7 +52,7 @@ class PredictionService {
     }
   }
 
-  // Calculer les prédictions (à améliorer selon tes besoins)
+  // Calculer les prédictions (à améliorer)
   Map<String, dynamic> _calculatePredictions(StockItem stock) {
     // Facteurs influençant la conservation
     final productType = stock.productName.toLowerCase();
@@ -121,11 +121,11 @@ class PredictionService {
     }
 
     if (risks.isEmpty) {
-      return 'low';
+      return 'Faible';
     } else if (risks.length == 1) {
-      return 'medium';
+      return 'Moyen';
     } else {
-      return 'high';
+      return 'Eleve';
     }
   }
 

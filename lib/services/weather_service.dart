@@ -3,9 +3,9 @@ import 'package:http/http.dart' as http;
 import '../models/weather_data.dart';
 
 class WeatherService {
-  // Coordonnées par défaut (Dakar, Sénégal — adapte selon ton besoin)
-  static const double _lat = 14.6928;
-  static const double _lon = -17.4467;
+  // Coordonnées (Calais, France)
+  static const double _lat = 50.9513;
+  static const double _lon = 1.8587;
 
   Future<WeatherData?> fetchWeather() async {
     try {

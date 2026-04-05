@@ -8,7 +8,7 @@ class ProfileService {
   // On pourrait utiliser "current_profile" comme identifiant fixe
   static const String PROFILE_KEY = 'user_profile';
 
-  // Option 1: Utiliser un ID fixe (recommandé pour un seul profil)
+  // Option 1: Utiliser un ID fixe
   Future<void> createOrUpdateProfile(UserProfile profile) async {
     try {
       await _database.child(PROFILE_KEY).set(profile.toMap());
@@ -56,7 +56,7 @@ class ProfileService {
     }
   }
 
-  // Supprimer le profil (optionnel)
+  // Supprimer le profil
   Future<void> deleteProfile() async {
     try {
       await _database.child(PROFILE_KEY).remove();
