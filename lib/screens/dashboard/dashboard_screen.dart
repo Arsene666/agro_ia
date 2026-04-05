@@ -126,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         return Scaffold(
           backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
-          // FIX: Move floatingActionButton here, outside the body
+          //floatingActionButton
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
               final result = await Navigator.push(
@@ -164,8 +164,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                         // Afficher les stocks dynamiques
                         _buildStockList(),
-
-                        // The button was removed from here to fix the syntax error
 
                         const SizedBox(height: 24),
                         _buildSectionHeader(context, "Alertes", ""),
@@ -206,13 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               bottomLeft: Radius.circular(30),
               bottomRight: Radius.circular(30),
             ),
-            image: DecorationImage(
-              image: NetworkImage(
-                'https://images.unsplash.com/photo-1625246333195-551e512451f8?q=80&w=1000',
-              ),
-              fit: BoxFit.cover,
-              opacity: 0.1,
-            ),
+
           ),
           child: SafeArea(
             bottom: false,

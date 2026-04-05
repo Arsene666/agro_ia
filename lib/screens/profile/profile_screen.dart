@@ -184,7 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // En-tête avec photo de profil (optionnel)
+          // En-tête avec photo de profil
           Center(
             child: Column(
               children: [

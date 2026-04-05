@@ -3,9 +3,6 @@ import '../../theme/app_theme.dart';
 import '../../services/alert_service.dart';
 import '../../models/alert.dart';
 
-// Import MonitoringService supprimé (inutilisé)
-//  Import intl supprimé (inutilisé)
-
 class AlertsScreen extends StatefulWidget {
   const AlertsScreen({super.key});
 
@@ -315,7 +312,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
   }
 
   // ============================================================
-  // CARTE ALERTE — ✅ Text() sans argument supprimé
+  // CARTE ALERTE
   // ============================================================
 
   Widget _buildAlertItem(Alert alert) {
@@ -645,16 +642,16 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('📱 SMS envoyés automatiquement pour :',
+                    Text('SMS envoyés automatiquement pour :',
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 12)),
                     SizedBox(height: 6),
                     Text(
-                      '🌡️  Température > 30°C ou < 10°C\n'
-                          '💧 Humidité > 80% ou < 30%\n'
-                          '📦 Stock périmé ou critique\n'
-                          '⏱️  Anti-doublon : 1 SMS / 30 min / type',
+                      'Température > 30°C ou < 10°C\n'
+                          'Humidité > 80% ou < 30%\n'
+                          'Stock périmé ou critique\n'
+                          'Anti-doublon : 1 SMS / 30 min / type',
                       style: TextStyle(
                           fontSize: 11, color: Colors.blueGrey),
                     ),

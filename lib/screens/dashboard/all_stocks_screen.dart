@@ -100,7 +100,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
         });
       },
       backgroundColor: Colors.grey.shade100,
-      selectedColor: AppTheme.primaryGreen.withOpacity(0.2),
+      selectedColor: AppTheme.primaryGreen.withValues(alpha:0.2),
       checkmarkColor: AppTheme.primaryGreen,
       labelStyle: TextStyle(
         color: isSelected ? AppTheme.primaryGreen : Colors.grey.shade700,
@@ -176,7 +176,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withOpacity(0.7)],
+          colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withValues(alpha:0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -193,7 +193,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
           Container(
             width: 1,
             height: 40,
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha:0.3),
           ),
           _buildSummaryItem(
             'Quantité totale',
@@ -203,7 +203,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
           Container(
             width: 1,
             height: 40,
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha:0.3),
           ),
           _buildSummaryItem(
             'Critique',
@@ -231,7 +231,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha:0.9),
             fontSize: 11,
           ),
         ),
@@ -287,7 +287,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha:0.02),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -299,7 +299,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
+                color: statusColor.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(statusIcon, color: statusColor, size: 28),
@@ -338,7 +338,7 @@ class _AllStocksScreenState extends State<AllStocksScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

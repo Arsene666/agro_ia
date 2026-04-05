@@ -181,7 +181,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               ),
               const SizedBox(height: 24),
 
-
               // Bouton de sauvegarde
               ElevatedButton(
                 onPressed: _saveProfile,

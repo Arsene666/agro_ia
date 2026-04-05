@@ -86,13 +86,12 @@ class _ManualEntryScreenState extends State<ManualEntryScreen>
 
     setState(() => _isSaving = true);
 
-    // CORRECTION : Utiliser harvestDateStr au lieu de harvestDate
     final item = StockItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       productName: _productController.text.trim(),
       quantity: double.tryParse(_quantityController.text) ?? 0,
       unit: _selectedUnit,
-      harvestDateStr: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',  // Changé ici
+      harvestDateStr: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
       harvestTime: _selectedTime.format(context),
       location: _locationController.text.trim(),
       notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),  // notes peut être null
@@ -244,12 +243,12 @@ class _ManualEntryScreenState extends State<ManualEntryScreen>
                                 border: Border.all(
                                   color: selected
                                       ? _green
-                                      : Colors.grey.withOpacity(0.2),
+                                      : Colors.grey.withValues(alpha:0.2),
                                 ),
                                 boxShadow: selected
                                     ? [
                                   BoxShadow(
-                                    color: _green.withOpacity(0.3),
+                                    color: _green.withValues(alpha:0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 3),
                                   )
@@ -444,10 +443,10 @@ class _ManualEntryScreenState extends State<ManualEntryScreen>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: _green.withOpacity(0.08),
+                        color: _green.withValues(alpha:0.08),
                         borderRadius: BorderRadius.circular(16),
                         border:
-                        Border.all(color: _green.withOpacity(0.2)),
+                        Border.all(color: _green.withValues(alpha:0.2)),
                       ),
                       child: Row(
                         children: [
@@ -498,7 +497,7 @@ class _ManualEntryScreenState extends State<ManualEntryScreen>
                           backgroundColor: _green,
                           foregroundColor: Colors.white,
                           elevation: 4,
-                          shadowColor: _green.withOpacity(0.4),
+                          shadowColor: _green.withValues(alpha:0.4),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -565,7 +564,7 @@ class _ManualEntryScreenState extends State<ManualEntryScreen>
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
