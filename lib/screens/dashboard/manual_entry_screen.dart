@@ -86,15 +86,16 @@ class _ManualEntryScreenState extends State<ManualEntryScreen>
 
     setState(() => _isSaving = true);
 
+    // CORRECTION : Utiliser harvestDateStr au lieu de harvestDate
     final item = StockItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       productName: _productController.text.trim(),
       quantity: double.tryParse(_quantityController.text) ?? 0,
       unit: _selectedUnit,
-      harvestDate: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+      harvestDateStr: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',  // Changé ici
       harvestTime: _selectedTime.format(context),
       location: _locationController.text.trim(),
-      notes: _notesController.text.trim(),
+      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),  // notes peut être null
       createdAt: DateTime.now(),
     );
 
@@ -139,7 +140,7 @@ class _ManualEntryScreenState extends State<ManualEntryScreen>
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(true);  // Retourne true pour indiquer un succès
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _green,

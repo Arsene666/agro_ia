@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:agro_ia/services/stock_service.dart';
+import 'package:agro_ia/services/prediction_service.dart';
+import 'package:agro_ia/models/stock_item.dart';
+import 'package:agro_ia/screens/dashboard/stock_detail_screen.dart';
+
 
 import '../../models/weather_data.dart';
 import '../../services/sensor_history_service.dart';
@@ -8,6 +13,7 @@ import '../../services/weather_service.dart';
 import '../../theme/app_theme.dart';
 import '../../services/firebase_service.dart';
 import '../../models/sensor_data.dart';
+import 'all_stocks_screen.dart';
 import 'manual_entry_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -22,13 +28,54 @@ final SensorHistoryService _sensorHistoryService = SensorHistoryService();
 class _DashboardScreenState extends State<DashboardScreen> {
   final FirebaseService _firebaseService = FirebaseService();
   final WeatherService _weatherService = WeatherService();
+  final StockService _stockService = StockService();
+  final PredictionService _predictionService = PredictionService();
   WeatherData? _weatherData;
   bool _weatherLoading = true;
+
+  List<StockItem> _stocks = [];
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
     _loadWeather();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      print('Chargement des stocks...'); // Debug
+      final stocks = await _stockService.getAllStocks();
+      print('Nombre de stocks chargés: ${stocks.length}'); // Debug
+
+      if (stocks.isNotEmpty) {
+        print('Premier stock: ${stocks.first.productName}'); // Debug
+        print('Quantité: ${stocks.first.quantity}'); // Debug
+        print('Localisation: ${stocks.first.location}'); // Debug
+      }
+
+      setState(() {
+        _stocks = stocks;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Erreur détaillée: $e'); // Debug
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _refresh() async {
+    await _loadData();
   }
 
   Future<void> _loadWeather() async {
@@ -38,6 +85,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _weatherLoading = false;
     });
   }
+
+  // Naviguer vers la page de tous les stocks
+  void _navigateToAllStocks() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AllStocksScreen()),
+    );
+    if (result == true) {
+      _refresh();
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -69,62 +128,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
           backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
           // FIX: Move floatingActionButton here, outside the body
           floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ManualEntryScreen(),
                 ),
               );
+              if (result == true) {
+                _refresh();
+              }
             },
             backgroundColor: AppTheme.primaryGreen,
             child: const Icon(Icons.add, color: Colors.white),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildHeader(context, sensor),
-                const SizedBox(height: 60),
+          body: RefreshIndicator(
+            onRefresh: _refresh,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  _buildHeader(context, sensor),
+                  const SizedBox(height: 60),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionHeader(context, "Statut des stocks", "Voir tout"),
-                      const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(context, "Statut des stocks",
+                          "Voir tout",
+                          onActionTap: _navigateToAllStocks,
+                        ),
+                        const SizedBox(height: 16),
 
-                      _buildStockItem(
-                        context,
-                        "Tomates",
-                        "200 kg",
-                        "Récolté il y a 2j",
-                        Colors.redAccent.withValues(alpha: 0.1),
-                        Colors.redAccent,
-                      ),
+                        // Afficher les stocks dynamiques
+                        _buildStockList(),
 
-                      // The button was removed from here to fix the syntax error
+                        // The button was removed from here to fix the syntax error
 
-                      const SizedBox(height: 24),
-                      _buildSectionHeader(context, "Alertes", ""),
-                      const SizedBox(height: 16),
-                      _buildAlertCard(context),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader(context, "Alertes", ""),
+                        const SizedBox(height: 16),
+                        _buildAlertCard(context),
 
-                      const SizedBox(height: 24),
-                      _buildSectionHeader(context, "Prévision météorologique", ""),
-                      const SizedBox(height: 16),
-                      _buildWeatherCard(context),
-                      const SizedBox(height: 30),
-                    ],
+                        const SizedBox(height: 24),
+                        _buildSectionHeader(
+                            context, "Prévision météorologique", ""),
+                        const SizedBox(height: 16),
+                        _buildWeatherCard(context),
+                        const SizedBox(height: 30),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
       },
     );
   }
+
 
   // ================= HEADER =================
 
@@ -273,7 +338,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // ================= CONTENU =================
 
   Widget _buildSectionHeader(
-      BuildContext context, String title, String action) {
+      BuildContext context, String title, String action, {VoidCallback? onActionTap}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -283,7 +348,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         if (action.isNotEmpty)
-          Text(
+        GestureDetector(
+        onTap: onActionTap,
+        child:Text(
             action,
             style: const TextStyle(
               color: AppTheme.primaryGreen,
@@ -291,79 +358,324 @@ class _DashboardScreenState extends State<DashboardScreen> {
               fontSize: 13,
             ),
           ),
+        ),
       ],
     );
   }
 
-  Widget _buildStockItem(
-    BuildContext context,
-    String name,
-    String weight,
-    String subtitle,
-    Color bgColor,
-    Color iconColor,
-  ) {
+
+// Liste dynamique des stocks
+Widget _buildStockList() {
+  if (_isLoading) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32.0),
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  if (_error != null) {
     return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      child: Column(
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red, size: 48),
+          const SizedBox(height: 12),
+          Text(
+            'Erreur: $_error',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: _refresh,
+            child: const Text('Réessayer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  if (_stocks.isEmpty) {
+    return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: const Column(
+            children: [
+            Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey),
+        SizedBox(height: 12),
+              Text(
+                'Aucun produit en stock',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Ajoutez votre premier produit avec le bouton +',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ],
+        ),
+    );
+  }
+
+  // Afficher les 3 premiers stocks seulement
+  final displayStocks = _stocks.take(3).toList();
+
+  return Column(
+      children: [
+      ...displayStocks.map((stock) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: _buildDynamicStockCard(stock),
+  )),
+  if (_stocks.length > 3)
+  Padding(
+  padding: const EdgeInsets.only(top: 8),
+  child: TextButton(
+  onPressed: _navigateToAllStocks,
+  child: Text(
+  'Et ${_stocks.length - 3} autre(s) produit(s)...',
+  style: const TextStyle(color: AppTheme.primaryGreen),
+  ),
+  ),
+  ),
+      ],
+  );
+}
+
+
+
+
+
+// Carte de stock dynamique avec données réelles
+Widget _buildDynamicStockCard(StockItem stock) {
+  // Déterminer la couleur et l'icône selon le statut
+  Color statusColor;
+  IconData statusIcon;
+  String statusLabel;
+
+  switch (stock.stockStatus) {
+    case 'expired':
+      statusColor = Colors.red;
+      statusIcon = Icons.warning_amber_rounded;
+      statusLabel = 'Périmé';
+      break;
+    case 'critical':
+      statusColor = Colors.orange;
+      statusIcon = Icons.priority_high;
+      statusLabel = 'Urgent';
+      break;
+    case 'warning':
+      statusColor = Colors.yellow.shade700;
+      statusIcon = Icons.info_outline;
+      statusLabel = 'À surveiller';
+      break;
+    default:
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle_outline;
+      statusLabel = 'Bon état';
+  }
+
+  return GestureDetector(
+    onTap: () async {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => StockDetailScreen(stock: stock),
+        ),
+      );
+      if (result == true) {
+        _refresh();
+      }
+    },
+    child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
+          // Icône avec statut
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Icon(Icons.inventory_2_outlined,
-                color: iconColor, size: 20),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(statusIcon, color: statusColor, size: 20),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
+
+          // Informations du produit
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  stock.productName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                Row(
+                  children: [
+                    Icon(Icons.location_on, size: 11, color: Colors.grey[400]),
+                    const SizedBox(width: 3),
+                    Flexible(
+                      child: Text(
+                      stock.location,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                    ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(Icons.calendar_today, size: 11, color: Colors.grey[400]),
+                    const SizedBox(width: 3),
+                    Text(
+                      'Récolté il y a ${stock.daysSinceHarvest}j',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          Text(weight,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(width: 8),
+
+          // Quantité et statut
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${stock.quantity.toStringAsFixed(0)} ${stock.unit}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: statusColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildAlertCard(BuildContext context) {
+  // Analyser les stocks pour générer des alertes dynamiques
+  final criticalStocks = _stocks.where((s) => s.stockStatus == 'critical' || s.stockStatus == 'expired').toList();
+
+  if (criticalStocks.isEmpty) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Row(
+        children: const [
+          Icon(Icons.check_circle, color: Colors.green, size: 28),
+          SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              "Aucune alerte critique. Tous les stocks sont en bonne état.",
+              style: TextStyle(color: Colors.green),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildAlertCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.errorBg,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      // ignore: prefer_const_constructors
-      child: Row(
-        children: const [
-          Icon(Icons.warning_amber_rounded,
-              color: AppTheme.errorRed, size: 28),
-          SizedBox(width: 16),
-          Expanded(
+  // Afficher la première alerte critique
+  final firstCritical = criticalStocks.first;
+  String alertMessage;
+
+  if (firstCritical.stockStatus == 'expired') {
+    alertMessage = "${firstCritical.productName} est périmé. Veuillez l'éliminer immédiatement.";
+  } else {
+    alertMessage = "${firstCritical.productName} arrive à expiration dans moins de 3 jours. Priorisez son écoulement.";
+  }
+
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppTheme.errorBg,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.warning_amber_rounded,
+            color: AppTheme.errorRed, size: 28),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            alertMessage,
+            style: const TextStyle(color: AppTheme.errorRed),
+          ),
+        ),
+        if (criticalStocks.length > 1)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.errorRed.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Text(
-              "Température élevée détectée dans l'entrepôt principal.",
-              style: TextStyle(color: AppTheme.errorRed),
+              '+${criticalStocks.length - 1}',
+              style: const TextStyle(color: AppTheme.errorRed, fontWeight: FontWeight.bold),
             ),
           ),
-        ],
-      ),
-    );
-  }
-  String _weatherIcon(int code) {
+      ],
+    ),
+  );
+}
+
+
+
+
+
+
+
+
+String _weatherIcon(int code) {
     if (code == 0) return '☀️';
     if (code <= 3) return '🌤️';
     if (code <= 48) return '🌫️';
@@ -423,7 +735,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   Text(
                     _weatherLabel(w.weatherCode),
-                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -469,8 +781,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
-
-
-
 }
+

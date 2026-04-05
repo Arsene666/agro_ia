@@ -1,3 +1,4 @@
+import 'package:agro_ia/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:agro_ia/theme/app_theme.dart';
 import 'dashboard/dashboard_screen.dart';
@@ -17,9 +18,9 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const DashboardScreen(),
-    const SensorsScreen(),
+    const SensorsPredictionsScreen(),
     const AlertsScreen(),
-    const Center(child: Text("Profil")), // Placeholder
+    const ProfileScreen(),
   ];
 
   @override
